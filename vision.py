@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 import streamlit as st
 model = genai.GenerativeModel('gemini-1.5-flash')
-chat_session = model.start_chat()
+chat_session = model.start_chat(
+    history=[]
+)
 def get_gemini_response(text, image=None):
     if text:
         if image:
