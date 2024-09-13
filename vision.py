@@ -1,9 +1,11 @@
 import os
 import google.generativeai as genai
 from PIL import Image
-genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 from dotenv import load_dotenv
 load_dotenv()
+genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
+
+
 import streamlit as st
 model = genai.GenerativeModel('gemini-1.5-flash')
 chat_session = model.start_chat(
