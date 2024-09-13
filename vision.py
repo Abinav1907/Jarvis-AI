@@ -1,7 +1,6 @@
 import os
 import google.generativeai as genai
 from PIL import Image
-os.environ['GOOGLE_API_KEY'] = "AIzaSyD8zZWCQdyHkQPQOdcQWAOiu_la9-LQ3ZY"
 genai.configure(api_key=os.environ['GOOGLE_API_KEY'])
 from dotenv import load_dotenv
 load_dotenv()
