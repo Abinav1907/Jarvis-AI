@@ -24,7 +24,7 @@ def get_gemini_response(text, image=None):
 st.set_page_config(page_title="Jarvis")
 st.header("Jarvis Application")
 input = st.text_input("Input: ", key="input") 
-uploaded_file = st.file_uploader("Choose an image...",type=["jpeg","jpg",'png'])
+uploaded_file = st.file_uploader("Choose an Image (if required)...",type=["jpeg","jpg",'png'])
 image = ""
 if uploaded_file is not None:
   image = Image.open(uploaded_file)
