@@ -22,7 +22,7 @@ def get_gemini_response(text, image=None):
     else:
         response = "No input provided."
     return response.text
-st.set_page_config(page_title="Royce")
+st.set_page_config(page_title="Royce AI")
 st.header("Royce AI")
 input = st.text_input("Input: ", key="input") 
 uploaded_file = st.file_uploader("Choose an Image (if required)...",type=["jpeg","jpg",'png'])
