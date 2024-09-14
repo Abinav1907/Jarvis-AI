@@ -22,8 +22,8 @@ def get_gemini_response(text, image=None):
     else:
         response = "No input provided."
     return response.text
-st.set_page_config(page_title="Nexia")
-st.header("Nexia AI")
+st.set_page_config(page_title="Royce")
+st.header("Royce AI")
 input = st.text_input("Input: ", key="input") 
 uploaded_file = st.file_uploader("Choose an Image (if required)...",type=["jpeg","jpg",'png'])
 image = ""
@@ -31,7 +31,7 @@ if uploaded_file is not None:
   image = Image.open(uploaded_file)
   st.image(image, caption="Uploaded Image", use_column_width=True)
 
-submit = st.button("Ask Nexia")
+submit = st.button("Ask Royce")
 
 
 
