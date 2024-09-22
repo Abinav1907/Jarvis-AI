@@ -120,7 +120,27 @@ def get_gemini_response(user_input_text, image=None):
 def main():
     st.set_page_config(page_title="Royce AI")
     st.header("Royce AI 🤖")
-
+    # Indicator for uploading documents
+    st.markdown(
+        """
+        <style>
+            .upload-indicator {
+                font-size: 20px;
+                font-weight: bold;
+                color: #FFFFFF; /* For text on dark backgrounds */
+                background-color: #1E1E1E; /* Dark background */
+                padding: 10px;
+                border-radius: 5px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+        </style>
+        <div class="upload-indicator">
+            Please use the sidebar to upload your Image, PDF, Word, and PowerPoint files! 😄
+            (If you don't find it, Check for a Small arrow at the top left corner of your device)
+        </div>
+        """, unsafe_allow_html=True
+    )
     # Sidebar for PDF, Word, and PowerPoint upload
     with st.sidebar:
         st.title("Upload Section")
