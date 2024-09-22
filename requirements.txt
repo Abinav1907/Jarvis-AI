@@ -1,4 +1,11 @@
 streamlit
-google-generativeai
-pillow
+PyPDF2
+langchain
+langchain-google-genai
 python-dotenv
+google-generativeai
+Pillow
+langchain-community
+python-docx
+python-pptx
+faiss-cpu
