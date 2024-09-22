@@ -118,6 +118,7 @@ def get_gemini_response(user_input_text, image=None):
     return response.text
 
 def main():
+    
     st.set_page_config(page_title="Royce AI")
     st.header("Royce AI 🤖")
     # Indicator for uploading documents
@@ -141,12 +142,14 @@ def main():
         </div>
         """, unsafe_allow_html=True
     )
+
+
     # Sidebar for PDF, Word, and PowerPoint upload
     with st.sidebar:
         st.title("Upload Section")
 
         # PDF Upload
-        pdf_docs = st.file_uploader("Upload your PDF Files", accept_multiple_files=True, key="pdf_uploader")
+        pdf_docs = st.file_uploader("Upload your PDF Files",type=["pdf"], accept_multiple_files=True, key="pdf_uploader")
         if st.button("Upload PDFs"):
             if pdf_docs:
                 with st.spinner("Processing PDFs..."):
