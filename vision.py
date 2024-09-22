@@ -137,7 +137,7 @@ def main():
             }
         </style>
         <div class="upload-indicator">
-            Please use the sidebar to upload your Image, PDF, Word, and PowerPoint files! 😄
+            Please use the sidebar to upload your Image, PDF, Word, and PowerPoint files!😄
             (If you don't find it, Check for a Small arrow at the top left corner of your device)
         </div>
         """, unsafe_allow_html=True
