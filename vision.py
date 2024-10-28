@@ -16,7 +16,12 @@ from pptx import Presentation
 # Load API key and configure Google Generative AI
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
+generation_config = {
+    "top_p": 0.95,
+    "top_k": 40,  # Adjusted to a valid value
+    "max_output_tokens": 8192,
+    "response_mime_type": "text/plain",
+}
 # Function to get text from Word, PowerPoint, and PDF files
 def get_word_text(word_docs):
     text = ""
@@ -62,7 +67,7 @@ Question:\n {question}\n
 Answer:
 """
 
-    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.3)
+    model = ChatGoogleGenerativeAI(model="gemini-1.5-pro 002", temperature=0.3)
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
     return chain
