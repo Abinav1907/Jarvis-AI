@@ -17,6 +17,7 @@ from pptx import Presentation
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+# Function to get text from Word, PowerPoint, and PDF files
 def get_word_text(word_docs):
     text = ""
     for doc in word_docs:
@@ -105,7 +106,7 @@ def handle_ppt_query(user_question):
 def get_gemini_response(user_input_text, image=None):
     model = genai.GenerativeModel('gemini-1.5-flash')
     chat_session = model.start_chat(history=[])
-    
+
     if user_input_text:
         if image:
             response = chat_session.send_message([user_input_text, image])
@@ -118,142 +119,88 @@ def get_gemini_response(user_input_text, image=None):
     return response.text
 
 def main():
-    
-    st.set_page_config(page_title="Royce AI")
+    st.set_page_config(page_title="Royce AI", layout="wide")  # Set layout to wide
     st.header("Royce AI 🤖")
-    # Indicator for uploading documents
-    st.markdown(
-        """
-        <style>
-            .upload-indicator {
-                font-size: 20px;
-                font-weight: bold;
-                color: #FFFFFF; /* For text on dark backgrounds */
-                background-color: #1E1E1E; /* Dark background */
-                padding: 10px;
-                border-radius: 5px;
-                text-align: center;
-                margin-bottom: 20px;
-            }
-        </style>
-        <div class="upload-indicator">
-            Please use the sidebar to upload your Image, PDF, Word, and PowerPoint files!😄
-            (If you don't find it, Check for a Small arrow at the top left corner of your device)
-        </div>
-        """, unsafe_allow_html=True
-    )
 
+    # Initialize session state to hold chat responses
+    if 'responses' not in st.session_state:
+        st.session_state.responses = []
+    if 'user_input_bottom' not in st.session_state:
+        st.session_state.user_input_bottom = ""
 
-    # Sidebar for PDF, Word, and PowerPoint upload
-    with st.sidebar:
-        st.title("Upload Section")
+    
 
-        # PDF Upload
-        pdf_docs = st.file_uploader("Upload your PDF Files",type=["pdf"], accept_multiple_files=True, key="pdf_uploader")
-        if st.button("Upload PDFs"):
+    # Chat history container
+    chat_container = st.container()
+    with chat_container:
+        st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+        for response in st.session_state.responses:
+            st.markdown(response)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # User input box (changed to text_area for multi-line input)
+    user_input_bottom = st.text_area("Type your question here...", value=st.session_state.user_input_bottom, placeholder="Ask a question...", key="user_input_bottom", height=100)
+
+    # Expander for uploading documents
+    with st.expander("📎 Upload Documents", expanded=False):  # Change 'expanded' to True to keep it open by default
+        pdf_docs = st.file_uploader("Upload your PDF Files", type=["pdf"], accept_multiple_files=True, key="pdf_uploader")
+        word_docs = st.file_uploader("Upload your Word Files", type=["docx"], accept_multiple_files=True, key="word_uploader")
+        ppt_docs = st.file_uploader("Upload your PowerPoint Files", type=["pptx"], accept_multiple_files=True, key="ppt_uploader")
+        uploaded_image = st.file_uploader("Upload an image (Optional)", type=["jpeg", "jpg", "png"], key="image_uploader")
+
+    # Function to handle button click and reset input
+    def ask_royce():
+        if user_input_bottom.strip():  # Check if user input is provided
+            # Initialize response variable
+            response_text = ""
+
+            # Check for uploaded documents
             if pdf_docs:
-                with st.spinner("Processing PDFs..."):
+                with st.spinner("Searching PDFs..."):
                     raw_text = get_pdf_text(pdf_docs)
                     text_chunks = get_text_chunks(raw_text)
                     get_vector_store(text_chunks, "faiss_index")  # Specify index name for PDFs
                     st.success("PDFs processed and stored for search.")
-            else:
-                st.warning("Please upload PDF files.")
-
-        # Word Upload
-        word_docs = st.file_uploader("Upload your Word Files", type=["docx"], accept_multiple_files=True, key="word_uploader")
-        if st.button("Upload Word Files"):
+                    pdf_response = handle_pdf_query(user_input_bottom)
+                    response_text += f"**PDF Response:** {pdf_response}\n"
             if word_docs:
-                with st.spinner("Processing Word files..."):
+                with st.spinner("Searching Word files..."):
                     raw_text = get_word_text(word_docs)
                     text_chunks = get_text_chunks(raw_text)
                     get_vector_store(text_chunks, "faiss_index_word")  # Specify index name for Word files
                     st.success("Word files processed and stored for search.")
-            else:
-                st.warning("Please upload Word files.")
-
-        # PowerPoint Upload
-        ppt_docs = st.file_uploader("Upload your PowerPoint Files", type=["pptx"], accept_multiple_files=True, key="ppt_uploader")
-        if st.button("Upload PowerPoint Files"):
+                    word_response = handle_word_query(user_input_bottom)
+                    response_text += f"**Word Response:** {word_response}\n"
             if ppt_docs:
-                with st.spinner("Processing PowerPoint files..."):
+                with st.spinner("Searching PowerPoint files..."):
                     raw_text = get_ppt_text(ppt_docs)
                     text_chunks = get_text_chunks(raw_text)
                     get_vector_store(text_chunks, "faiss_index_ppt")  # Specify index name for PowerPoint files
                     st.success("PowerPoint files processed and stored for search.")
-            else:
-                st.warning("Please upload PowerPoint files.")
-
-        # Image Upload
-        uploaded_image = st.file_uploader("Upload an image (Optional)", type=["jpeg", "jpg", "png"], key="image_uploader")
-        if st.button("Upload Image"):
+                    ppt_response = handle_ppt_query(user_input_bottom)
+                    response_text += f"**PPT Response:** {ppt_response}\n"
+             
             if uploaded_image:
                 st.image(uploaded_image, caption="Uploaded Image", use_column_width=True)
-            else:
-                st.warning("Please upload an image.")
+                chat_response = get_gemini_response(user_input_bottom, Image.open(uploaded_image))
+                response_text += f"**Image Response:** {chat_response}\n"
 
-    # Single input box for both query and chat
-    user_input_text = st.text_input("Ask a question or chat with Royce")
+            # If no responses were generated from documents, handle as a normal chat
+            if not response_text:
+                chat_response = get_gemini_response(user_input_bottom)
+                response_text += f"**Royce's Response:** \n{chat_response}\n"
 
-    # Initialize image variable
-    image = None
-    if uploaded_image:
-        image = Image.open(uploaded_image)
+            # Store responses in session state
+            st.session_state.responses.append(f"**Q:** {user_input_bottom}\n\n{response_text}")
 
-    if st.button("Ask Royce"):
-    # Check if any documents were uploaded
-      if pdf_docs or word_docs or ppt_docs:
-          # Search PDFs
-          if pdf_docs:
-              with st.spinner("Searching PDFs..."):
-                  pdf_response = handle_pdf_query(user_input_text)
-                  if pdf_response:
-                      st.subheader("PDF Response:")
-                      st.write(pdf_response)
-                  else:
-                      st.subheader("PDF Response:")
-                      st.write("No relevant information found in the PDF.")
+            # Clear the input in session state (but before the next render)
+            st.session_state.user_input_bottom = ""  # Reset the input
+        else:
+            st.warning("Please type a question or upload files.")
 
-          # Search Word files
-          if word_docs:
-              with st.spinner("Searching Word files..."):
-                  word_response = handle_word_query(user_input_text)
-                  if word_response:
-                      st.subheader("Word Response:")
-                      st.write(word_response)
-                  else:
-                      st.subheader("Word Response:")
-                      st.write("No relevant information found in the Document provided.")
-
-          # Search PowerPoint files
-          if ppt_docs:
-              with st.spinner("Searching PowerPoint files..."):
-                  ppt_response = handle_ppt_query(user_input_text)
-                  if ppt_response:
-                      st.subheader("PowerPoint Response:")
-                      st.write(ppt_response)
-                  else:
-                      st.subheader("PPT Response:")
-                      st.write("No relevant information found in the Document provided.")
-
-          # Prompt for further input if user_input_text is empty
-          if not user_input_text:
-              st.warning("You can ask questions about the uploaded documents or chat normally.")
-      elif uploaded_image:
-          # If only an image is uploaded
-          chat_response = get_gemini_response(user_input_text, image)
-          st.subheader("Royce's Response:")
-          st.write(chat_response)
-      else:
-          # If no documents or image are uploaded
-          if user_input_text:
-              chat_response = get_gemini_response(user_input_text, image)
-              st.subheader("Royce's Response:")
-              st.write(chat_response)
-          else:
-              st.warning("Please upload files or ask a question.")
-
-
+    # Ask Royce button
+    if st.button("Ask Royce", on_click=ask_royce):
+        pass  # The function is already handled in the on_click
 
 if __name__ == "__main__":
     main()
