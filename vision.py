@@ -12,10 +12,9 @@ from PIL import Image
 from langchain_community.vectorstores import FAISS
 from docx import Document
 from pptx import Presentation
-
 # Load API key and configure Google Generative AI
 load_dotenv()
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+genai.configure(api_key="AIzaSyD8zZWCQdyHkQPQOdcQWAOiu_la9-LQ3ZY")
 generation_config = {
     "top_p": 0.95,
     "top_k": 40,  # Adjusted to a valid value
